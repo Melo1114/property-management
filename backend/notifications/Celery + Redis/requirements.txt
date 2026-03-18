@@ -1,0 +1,12 @@
+django>=5.0,<6.0
+djangorestframework>=3.15,<4.0
+psycopg2-binary>=2.9,<3.0
+python-dotenv>=1.0,<2.0
+djangorestframework-simplejwt>=5.4,<6.0
+django-cors-headers>=4.0,<5.0
+
+# ── Async task queue ───────────────────────────────────────────────────────
+celery>=5.3,<6.0
+redis>=5.0,<6.0                  # Redis client used by Celery broker + result backend
+django-celery-beat>=2.6,<3.0    # Stores periodic task schedules in the database
+django-celery-results>=2.5,<3.0 # Stores task results in the database (optional but useful)
