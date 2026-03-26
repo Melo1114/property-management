@@ -36,14 +36,11 @@ COPY --chown=django:django . .
 # Collect static files (WhiteNoise serves them; no external static server needed)
 RUN python manage.py collectstatic --noinput
 
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
 USER django
 
 EXPOSE 8000
 
-# Gunicorn: 2 workers per CPU core is a good starting point on Azure App Service
-CMD ["gunicorn", "backend.wsgi:application", \
-     "--bind", "0.0.0.0:8000", \
-     "--workers", "2", \
-     "--timeout", "120", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
+ENTRYPOINT ["./entrypoint.sh"]

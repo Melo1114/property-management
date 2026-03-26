@@ -174,15 +174,6 @@ jobs:
           app-name:   ${{ secrets.AZURE_BACKEND_APP_NAME }}
           images:     ${{ env.BACKEND_IMAGE }}
 
-      # ── Run Django migrations post-deploy ────────────────────────────────────
-      # Azure App Service supports SSH commands via az webapp ssh
-      - name: Run migrations
-        run: |
-          az webapp exec \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --name ${{ secrets.AZURE_BACKEND_APP_NAME }} \
-            --command "python manage.py migrate --noinput"
-
       # ── Deploy frontend ──────────────────────────────────────────────────────
       - name: Deploy frontend to Azure App Service
         uses: azure/webapps-deploy@v3
