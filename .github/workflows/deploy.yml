@@ -178,7 +178,7 @@ jobs:
       # Azure App Service supports SSH commands via az webapp ssh
       - name: Run migrations
         run: |
-          az webapp ssh \
+          az webapp exec \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --name ${{ secrets.AZURE_BACKEND_APP_NAME }} \
             --command "python manage.py migrate --noinput"
