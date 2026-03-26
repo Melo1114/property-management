@@ -8,7 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.12"
-  NODE_VERSION:   "20"
+  NODE_VERSION:   "22"
   # Azure Container Registry — set these in GitHub repo secrets
   ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}   # e.g. propertypro.azurecr.io
   BACKEND_IMAGE:    ${{ secrets.ACR_LOGIN_SERVER }}/backend:${{ github.sha }}
@@ -95,6 +95,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
