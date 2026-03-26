@@ -13,7 +13,7 @@ export default function MaintenancePage() {
         <div className="flex h-16 items-center px-4 sm:px-6">
           <div className="flex items-center gap-2 font-semibold">
             <Home className="h-6 w-6" />
-            <span className="hidden sm:inline-block">PropertyPro</span>
+            <span className="hidden sm:inline-block">AurumKeys</span>
           </div>
           <MainNav className="mx-6" />
           <div className="ml-auto flex items-center gap-4">

@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
 
 export const metadata: Metadata = {
-  title: "PropertyPro",
+  title: "AurumKeys",
   description: "Tenant & Property Management System",
 };
 

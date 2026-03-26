@@ -18,15 +18,15 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB:       propertypro
-      POSTGRES_USER:     propertypro
-      POSTGRES_PASSWORD: propertypro
+      POSTGRES_DB:       aurumkeys
+      POSTGRES_USER:     aurumkeys
+      POSTGRES_PASSWORD: aurumkeys
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U propertypro"]
+      test: ["CMD-SHELL", "pg_isready -U aurumkeys"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,20 +46,20 @@ services:
   # ── Django backend ──────────────────────────────────────────────────────────
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: backend/.env
     environment:
       DEBUG:        "True"
-      DATABASE_URL: "postgres://propertypro:propertypro@db:5432/propertypro"
+      DATABASE_URL: "postgres://aurumkeys:aurumkeys@db:5432/aurumkeys"
       DB_SSLMODE:   "disable"
       REDIS_URL:    "redis://redis:6379/0"
       ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
     ports:
       - "8000:8000"
     volumes:
-      - .:/app                    # live-reload: code changes reflected instantly
+      - ./backend:/app                    # live-reload: code changes reflected instantly
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     depends_on:
@@ -78,16 +78,16 @@ services:
   # ── Celery worker ───────────────────────────────────────────────────────────
   celery_worker:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: backend/.env
     environment:
-      DATABASE_URL: "postgres://propertypro:propertypro@db:5432/propertypro"
+      DATABASE_URL: "postgres://aurumkeys:aurumkeys@db:5432/aurumkeys"
       DB_SSLMODE:   "disable"
       REDIS_URL:    "redis://redis:6379/0"
     volumes:
-      - .:/app
+      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy
@@ -98,16 +98,16 @@ services:
   # ── Celery beat (scheduled tasks) ───────────────────────────────────────────
   celery_beat:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: .env
+    env_file: backend/.env
     environment:
-      DATABASE_URL: "postgres://propertypro:propertypro@db:5432/propertypro"
+      DATABASE_URL: "postgres://aurumkeys:aurumkeys@db:5432/aurumkeys"
       DB_SSLMODE:   "disable"
       REDIS_URL:    "redis://redis:6379/0"
     volumes:
-      - .:/app
+      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy
@@ -120,7 +120,7 @@ services:
   # ── Next.js frontend ────────────────────────────────────────────────────────
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile.frontend
     restart: unless-stopped
     environment:

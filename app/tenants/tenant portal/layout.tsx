@@ -245,7 +245,7 @@ export default function TenantLayout({ children }: { children: React.ReactNode }
                 <path d="M3 9.5L12 3l9 6.5V21a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
               </svg>
             </div>
-            <span className="t-brand-name">PropertyPro</span>
+            <span className="t-brand-name">AurumKeys</span>
           </div>
 
           {/* Nav links */}

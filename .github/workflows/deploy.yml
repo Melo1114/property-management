@@ -1,4 +1,4 @@
-name: CI / CD — PropertyPro
+name: CI / CD — AurumKeys
 
 on:
   push:
@@ -63,15 +63,19 @@ jobs:
           cache: pip
 
       - name: Install dependencies
+        working-directory: backend
         run: pip install -r requirements.txt
 
       - name: Run migrations
+        working-directory: backend
         run: python manage.py migrate --noinput
 
       - name: Run tests
+        working-directory: backend
         run: python manage.py test --verbosity=2
 
       - name: Check for missing migrations
+        working-directory: backend
         run: python manage.py migrate --check
 
 
@@ -88,14 +92,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend
         run: npm ci
 
       - name: Build Next.js
-        working-directory: frontend
         env:
           NEXT_PUBLIC_API_URL: https://placeholder.azurewebsites.net/api
         run: npm run build
@@ -125,8 +126,8 @@ jobs:
       - name: Build & push backend
         uses: docker/build-push-action@v5
         with:
-          context:    .
-          file:       Dockerfile
+          context:    ./backend
+          file:       ./backend/Dockerfile
           push:       true
           tags:       ${{ env.BACKEND_IMAGE }},
                       ${{ secrets.ACR_LOGIN_SERVER }}/backend:latest
@@ -137,8 +138,8 @@ jobs:
       - name: Build & push frontend
         uses: docker/build-push-action@v5
         with:
-          context:    ./frontend
-          file:       ./frontend/Dockerfile.frontend
+          context:    .
+          file:       ./Dockerfile.frontend
           push:       true
           tags:       ${{ env.FRONTEND_IMAGE }},
                       ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest

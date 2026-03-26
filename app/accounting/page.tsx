@@ -20,7 +20,7 @@ export default function AccountingPage() {
         <div className="flex h-16 items-center px-4 border-b">
           <div className="flex items-center gap-2 font-semibold whitespace-nowrap">
             <Home className="h-6 w-6 flex-shrink-0" />
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">PropertyPro</span>
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">AurumKeys</span>
           </div>
         </div>
         <div className="py-4">

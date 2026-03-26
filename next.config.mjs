@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Required for the Docker standalone build — copies only the files
+  // needed to run the app into .next/standalone (no node_modules bloat)
+  output: "standalone",
+
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -9,6 +13,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;
