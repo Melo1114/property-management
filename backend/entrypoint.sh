@@ -1,8 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-echo "Running database migrations..."
+echo "Running migrations..."
 python manage.py migrate --noinput
+
+echo "Creating superuser..."
+python manage.py createsuperuser --noinput || true
 
 echo "Starting Gunicorn..."
 exec gunicorn backend.wsgi:application \
