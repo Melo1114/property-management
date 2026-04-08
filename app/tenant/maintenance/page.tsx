@@ -170,7 +170,7 @@ function RequestCard({ req }: { req: MaintenanceRequest }) {
                   }}>
                     <div style={{ fontSize:12, fontWeight:600, color:"#374151",
                                   marginBottom:4 }}>
-                      {c.author_name ?? c.author_username}
+                      {c.author_full_name ?? c.author_username}
                       <span style={{ color:"#9CA3AF", fontWeight:400, marginLeft:8 }}>
                         {new Date(c.created_at).toLocaleDateString("en-ZA", {
                           day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit",
