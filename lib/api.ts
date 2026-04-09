@@ -145,7 +145,7 @@ export const authApi = {
   login: (credentials: LoginCredentials) =>
     api.post<AuthTokens & { role: string; full_name: string }>(
       "/auth/login/",
-      credentials
+      { username: credentials.email, password: credentials.password }
     ),
 
   register: (payload: RegisterPayload) =>
