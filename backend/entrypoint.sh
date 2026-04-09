@@ -2,7 +2,7 @@
 set -e
 
 python manage.py migrate --noinput
-python manage.py createsuperuser --noinput || true
+echo "from django.contrib.auth import get_user_model; U = get_user_model(); U.objects.filter(username='admin').delete(); U.objects.create_superuser(username='admin', email='admin@aurumkeys.co.za', password='Aurumkeys@2025!')" | python manage.py shell
 
 # Start Celery worker in background
 celery -A backend worker --loglevel=info &
