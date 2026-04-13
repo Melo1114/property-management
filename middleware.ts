@@ -5,7 +5,8 @@ const PUBLIC_PATHS = ['/login', '/register', '/forgot-password']
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const token = request.cookies.get('access_token')?.value
+  // Must match the cookie name set in auth-context.tsx: `pm_access`
+  const token = request.cookies.get('pm_access')?.value
 
   const isPublic = PUBLIC_PATHS.some(path => pathname.startsWith(path))
 
