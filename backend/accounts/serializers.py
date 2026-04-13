@@ -1,46 +1,69 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from .models import User
 
 
-User = get_user_model()
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "role",
-            "phone_number",
-        ]
-        read_only_fields = ["id"]
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token["role"]      = user.role
+        token["full_name"] = user.get_full_name()
+        token["email"]     = user.email
+        return token
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password  = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+    password2 = serializers.CharField(write_only=True, required=True, label="Confirm password")
 
     class Meta:
-        model = User
+        model  = User
         fields = [
-            "id",
-            "username",
-            "email",
-            "password",
-            "first_name",
-            "last_name",
-            "role",
-            "phone_number",
+            "username", "email", "first_name", "last_name",
+            "phone_number", "address", "role",
+            "password", "password2",
         ]
-        read_only_fields = ["id", "role"]
+        extra_kwargs = {
+            "first_name": {"required": True},
+            "last_name":  {"required": True},
+        }
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs.pop("password2"):
+            raise serializers.ValidationError({"password": "Passwords do not match."})
+        return attrs
 
     def create(self, validated_data):
-        password = validated_data.pop("password")
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
+        user = User.objects.create_user(**validated_data)
         return user
 
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = User
+        fields = [
+            "id", "username", "email",
+            "first_name", "last_name",
+            "phone_number", "address", "role",
+            "date_joined",
+        ]
+        read_only_fields = fields
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = User
+        fields = [
+            "id", "username", "email",
+            "first_name", "last_name",
+            "role", "is_active", "date_joined",
+        ]
+
+
+class UserSerializer(UserProfileSerializer):
+    pass
