@@ -98,10 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push("/tenant/dashboard");
       } else if (role === "Vendor") {
         router.push("/vendor/dashboard");
-      } else {
-        router.push("/dashboard");
+           } else {
+        router.push("/");
       }
-    },
     [router]
   );
 
