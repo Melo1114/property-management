@@ -4,20 +4,22 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_PATHS = ['/login', '/register', '/forgot-password']
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  // Must match the cookie name set in auth-context.tsx: `pm_access`
-  const token = request.cookies.get('pm_access')?.value
+  // Skip Next.js internal RSC (React Server Component) requests — redirecting
+  // these breaks client-side navigation and causes "page can't reload" errors.
+  if (request.headers.get('RSC') === '1') {
+    return NextResponse.next()
+  }
 
+  const { pathname } = request.nextUrl
+  const token = request.cookies.get('pm_access')?.value
   const isPublic = PUBLIC_PATHS.some(path => pathname.startsWith(path))
 
-  // Redirect unauthenticated users to login
   if (!isPublic && !token) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Redirect authenticated users away from login/register
   if (isPublic && token) {
     return NextResponse.redirect(new URL('/', request.url))
   }
