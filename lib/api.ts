@@ -94,6 +94,7 @@ api.interceptors.response.use(
     if (original.url?.includes("/auth/token/refresh/")) {
       clearTokens();
       window.location.href = "/login";
+            document.cookie = "pm_access=; path=/; max-age=0";
       return Promise.reject(error);
     }
 
@@ -112,6 +113,7 @@ api.interceptors.response.use(
 
     const refreshToken = getRefreshToken();
     if (!refreshToken || isTokenExpired(refreshToken)) {
+           document.cookie = "pm_access=; path=/; max-age=0";
       clearTokens();
       window.location.href = "/login";
       return Promise.reject(error);
@@ -127,6 +129,7 @@ api.interceptors.response.use(
       original.headers.Authorization = `Bearer ${data.access}`;
       return api(original);
     } catch (refreshError) {
+            document.cookie = "pm_access=; path=/; max-age=0";
       processQueue(refreshError, null);
       clearTokens();
       window.location.href = "/login";
