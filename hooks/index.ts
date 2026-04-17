@@ -49,7 +49,8 @@ type FetchState<T> = {
 
 function useFetch<T>(
   fetcher: () => Promise<{ data: T }>,
-  deps: unknown[] = []
+  deps: unknown[] = [],
+  options: { asArray?: boolean } = {}
 ) {
   const [state, setState] = useState<FetchState<T>>({
     data: null,
@@ -61,12 +62,37 @@ function useFetch<T>(
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const { data } = await fetcher();
-      setState({ data, isLoading: false, error: null });
+      // Defensive normalization: if this endpoint is supposed to return an
+      // array (list endpoint), ensure `data` is always an array. This
+      // prevents ".map is not a function" crashes in downstream components
+      // when the backend returns unexpected shapes (single object, error
+      // envelope, paginated object without `results`, etc.).
+      let normalized = data;
+      if (options.asArray) {
+        if (Array.isArray(data)) {
+          normalized = data;
+        } else if (
+          data &&
+          typeof data === "object" &&
+          "results" in (data as Record<string, unknown>) &&
+          Array.isArray((data as { results?: unknown }).results)
+        ) {
+          normalized = (data as { results: T }).results;
+        } else {
+          // Unknown shape — coerce to empty array instead of crashing
+          normalized = [] as unknown as T;
+        }
+      }
+      setState({ data: normalized, isLoading: false, error: null });
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data
           ?.detail ?? "An error occurred";
-      setState({ data: null, isLoading: false, error: msg });
+      setState({
+        data: (options.asArray ? ([] as unknown as T) : null),
+        isLoading: false,
+        error: msg,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
@@ -93,7 +119,8 @@ export function useDashboard() {
 export function useProperties(search?: string) {
   const result = useFetch<Property[]>(
     () => propertiesApi.list(search),
-    [search]
+    [search],
+    { asArray: true }
   );
 
   const createProperty = useCallback(
@@ -132,7 +159,8 @@ export function useProperty(id: number) {
 export function useUnits(params?: { property?: number; status?: string }) {
   const result = useFetch<Unit[]>(
     () => propertiesApi.listUnits(params),
-    [params?.property, params?.status]
+    [params?.property, params?.status],
+    { asArray: true }
   );
 
   const createUnit = useCallback(
@@ -169,7 +197,8 @@ export function useUnits(params?: { property?: number; status?: string }) {
 export function useTenants(search?: string) {
   const result = useFetch<User[]>(
     () => authApi.getTenants(search),
-    [search]
+    [search],
+    { asArray: true }
   );
 
   const updateTenant = useCallback(
@@ -202,7 +231,8 @@ export function useTenant(id: number) {
 export function useLeases(status?: string) {
   const result = useFetch<Lease[]>(
     () => leasesApi.list(status),
-    [status]
+    [status],
+    { asArray: true }
   );
 
   const createLease = useCallback(
@@ -234,7 +264,7 @@ export function useLeases(status?: string) {
 
 /** For tenants: fetch only their own leases */
 export function useMyLeases() {
-  return useFetch<Lease[]>(() => leasesApi.myLeases());
+  return useFetch<Lease[]>(() => leasesApi.myLeases(), [], { asArray: true });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -244,7 +274,8 @@ export function useMyLeases() {
 export function useInvoices(params?: { lease?: number; status?: string }) {
   const result = useFetch<Invoice[]>(
     () => paymentsApi.listInvoices(params),
-    [params?.lease, params?.status]
+    [params?.lease, params?.status],
+    { asArray: true }
   );
 
   const createInvoice = useCallback(
@@ -261,13 +292,16 @@ export function useInvoices(params?: { lease?: number; status?: string }) {
 export function usePayments(params?: { invoice?: number; status?: string }) {
   return useFetch<Payment[]>(
     () => paymentsApi.listPayments(params),
-    [params?.invoice, params?.status]
+    [params?.invoice, params?.status],
+    { asArray: true }
   );
 }
 
 /** For tenants: their own payment history */
 export function useMyPayments() {
-  return useFetch<Payment[]>(() => paymentsApi.myPayments());
+  return useFetch<Payment[]>(() => paymentsApi.myPayments(), [], {
+    asArray: true,
+  });
 }
 
 /**
@@ -344,7 +378,8 @@ export function useMaintenance(params?: {
 }) {
   const result = useFetch<MaintenanceRequest[]>(
     () => maintenanceApi.list(params),
-    [params?.status, params?.priority]
+    [params?.status, params?.priority],
+    { asArray: true }
   );
 
   const createRequest = useCallback(
@@ -408,7 +443,9 @@ export function useMaintenance(params?: {
 
 export function useNotifications() {
   const result = useFetch<Notification[]>(
-    () => notificationsApi.list()
+    () => notificationsApi.list(),
+    [],
+    { asArray: true }
   );
 
   const unreadCount = (result.data ?? []).filter((n) => !n.read).length;
