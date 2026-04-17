@@ -80,8 +80,15 @@ function processQueue(error: unknown, token: string | null = null) {
   failedQueue = [];
 }
 
+// Response interceptor: extract paginated results from DRF responses
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // If response is a paginated object with "results" key, extract the array
+    if (response.data && typeof response.data === 'object' && 'results' in response.data && Array.isArray(response.data.results)) {
+      return { ...response, data: response.data.results }
+    }
+    return response
+  },
   async (error) => {
     const original = error.config;
 
