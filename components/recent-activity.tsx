@@ -1,63 +1,47 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+"use client"
+
+import { Bell } from "lucide-react"
+import { useNotifications } from "@/hooks"
+
+function timeAgo(dateStr: string): string {
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (diff < 60) return "Just now"
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  if (diff < 172800) return "Yesterday"
+  return `${Math.floor(diff / 86400)} days ago`
+}
 
 export function RecentActivity() {
+  const { data: notifications, isLoading } = useNotifications()
+
+  if (isLoading) {
+    return <p className="py-4 text-sm text-muted-foreground">Loading activity…</p>
+  }
+  if (!notifications || notifications.length === 0) {
+    return <p className="py-4 text-sm text-muted-foreground">No recent activity yet.</p>
+  }
+
   return (
-    <div className="space-y-8">
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>OM</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">New tenant application received</p>
-          <p className="text-sm text-muted-foreground">Olivia Martinez applied for Apt 3B</p>
+    <div className="space-y-6">
+      {notifications.slice(0, 5).map((n) => (
+        <div key={n.id} className="flex items-start gap-4">
+          <div
+            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${
+              n.read ? "bg-muted" : "bg-primary/10 border-primary/20"
+            }`}
+          >
+            <Bell className={`h-4 w-4 ${n.read ? "text-muted-foreground" : "text-primary"}`} />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className={`text-sm leading-none ${n.read ? "font-medium" : "font-semibold"}`}>
+              {n.title}
+            </p>
+            <p className="truncate text-sm text-muted-foreground">{n.message}</p>
+          </div>
+          <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(n.created_at)}</span>
         </div>
-        <div className="ml-auto font-medium text-xs text-muted-foreground">Just now</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>JW</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Maintenance request completed</p>
-          <p className="text-sm text-muted-foreground">Leaky faucet fixed at 123 Main St #2A</p>
-        </div>
-        <div className="ml-auto font-medium text-xs text-muted-foreground">2 hours ago</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>RJ</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Rent payment received</p>
-          <p className="text-sm text-muted-foreground">Robert Johnson paid $1,450 for Apt 5C</p>
-        </div>
-        <div className="ml-auto font-medium text-xs text-muted-foreground">5 hours ago</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>SD</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">New maintenance request</p>
-          <p className="text-sm text-muted-foreground">Sarah Davis reported AC issues at 456 Oak St #4D</p>
-        </div>
-        <div className="ml-auto font-medium text-xs text-muted-foreground">Yesterday</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/placeholder.svg?height=36&width=36" alt="Avatar" />
-          <AvatarFallback>TW</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Lease renewal sent</p>
-          <p className="text-sm text-muted-foreground">Lease renewal sent to Thomas Wilson for Apt 2C</p>
-        </div>
-        <div className="ml-auto font-medium text-xs text-muted-foreground">2 days ago</div>
-      </div>
+      ))}
     </div>
   )
 }

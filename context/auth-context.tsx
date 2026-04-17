@@ -1,10 +1,6 @@
 "use client";
 
 // context/auth-context.tsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Provides `useAuthContext()` throughout the app.
-// Wraps the root layout — all child components can read user + call login/logout.
-
 import {
   createContext,
   useCallback,
@@ -23,40 +19,33 @@ import {
   isAuthenticated,
   setTokens,
 } from "@/lib/auth";
+import type { LoginCredentials, Role, User } from "@/lib/types";
 
-// Write/clear the httpOnly-style cookie that middleware.ts reads.
-// (middleware runs on the Edge — it can't access localStorage.)
 function setAuthCookie(token: string) {
   document.cookie = `pm_access=${token}; path=/; SameSite=Lax; max-age=3600`;
 }
 function clearAuthCookie() {
   document.cookie = "pm_access=; path=/; max-age=0";
 }
-import type { LoginCredentials, Role, User } from "@/lib/types";
-
-// ── Context shape ─────────────────────────────────────────────────────────────
 
 interface AuthContextValue {
   user: User | null;
   role: Role | null;
   isLoading: boolean;
   isLoggedIn: boolean;
-  login:  (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-// ── Provider ──────────────────────────────────────────────────────────────────
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  const [user,      setUser]      = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch the full user profile from /auth/me/
   const refreshUser = useCallback(async () => {
     if (!isAuthenticated()) {
       setUser(null);
@@ -74,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // On mount: rehydrate user from stored token
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
@@ -85,21 +73,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTokens(data.access, data.refresh);
       setAuthCookie(data.access);
 
-      // Decode token to get role immediately (no extra request)
       const payload = decodeToken(data.access);
 
-      // Then fetch full profile
       const profileRes = await authApi.me();
       setUser(profileRes.data);
 
-      // Role-based redirect
       const role = payload?.role;
       if (role === "Tenant") {
         router.push("/tenant/dashboard");
       } else if (role === "Vendor") {
         router.push("/vendor/dashboard");
       } else {
-        router.push("/dashboard");
+        router.push("/");
       }
     },
     [router]
@@ -114,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextValue = {
     user,
-    role:      user?.role ?? null,
+    role: user?.role ?? null,
     isLoading,
     isLoggedIn: !!user,
     login,
@@ -124,8 +109,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-// ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useAuthContext(): AuthContextValue {
   const ctx = useContext(AuthContext);

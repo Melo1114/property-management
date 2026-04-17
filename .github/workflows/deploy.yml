@@ -102,7 +102,7 @@ jobs:
 
       - name: Build Next.js
         env:
-          NEXT_PUBLIC_API_URL: https://placeholder.azurewebsites.net/api
+                  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         run: pnpm run build
 
 
@@ -138,18 +138,19 @@ jobs:
           cache-from: type=gha
           cache-to:   type=gha,mode=max
 
-      # ── Frontend image ───────────────────────────────────────────────────────
+           # ── Frontend image ───────────────────────────────────────────────────────
       - name: Build & push frontend
         uses: docker/build-push-action@v5
         with:
           context:    .
-          file:       ./Dockerfile.frontend
+          file:       Dockerfile.frontend
           push:       true
           tags:       ${{ env.FRONTEND_IMAGE }},
                       ${{ secrets.ACR_LOGIN_SERVER }}/frontend:latest
           cache-from: type=gha
           cache-to:   type=gha,mode=max
-
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
 
   # ── 4. Deploy to Azure App Service ──────────────────────────────────────────
   deploy:
