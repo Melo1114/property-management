@@ -24,7 +24,7 @@ export function PropertiesList() {
     return (
       <p className="py-4 text-sm text-muted-foreground">
         No properties yet.{" "}
-        <Link href="/properties/add" className="underline">Add your first property</Link>.
+        <Link href="/properties/new" className="underline">Add your first property</Link>.
       </p>
     )
   }
