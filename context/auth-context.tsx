@@ -22,9 +22,12 @@ import {
 import type { LoginCredentials, Role, User } from "@/lib/types";
 
 function setAuthCookie(token: string) {
-  document.cookie = `pm_access=${token}; path=/; SameSite=Lax; max-age=3600`;
+  document.cookie = `access_token=${token}; path=/; SameSite=Lax; max-age=3600`;
+  // Also clear legacy cookie name if present
+  document.cookie = "pm_access=; path=/; max-age=0";
 }
 function clearAuthCookie() {
+  document.cookie = "access_token=; path=/; max-age=0";
   document.cookie = "pm_access=; path=/; max-age=0";
 }
 
