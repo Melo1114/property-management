@@ -93,6 +93,7 @@ api.interceptors.response.use(
     // Don't retry the refresh endpoint itself — that would loop
     if (original.url?.includes("/auth/token/refresh/")) {
       clearTokens();
+      document.cookie = "access_token=; path=/; max-age=0";
       window.location.href = "/login";
       return Promise.reject(error);
     }
@@ -113,6 +114,7 @@ api.interceptors.response.use(
     const refreshToken = getRefreshToken();
     if (!refreshToken || isTokenExpired(refreshToken)) {
       clearTokens();
+      document.cookie = "access_token=; path=/; max-age=0";
       window.location.href = "/login";
       return Promise.reject(error);
     }
@@ -129,6 +131,7 @@ api.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError, null);
       clearTokens();
+      document.cookie = "access_token=; path=/; max-age=0";
       window.location.href = "/login";
       return Promise.reject(refreshError);
     } finally {
