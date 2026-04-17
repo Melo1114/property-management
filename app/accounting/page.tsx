@@ -1,6 +1,4 @@
-"use client"
-
-import { AlertCircle, DollarSign, Download, FileText, Filter, Home } from "lucide-react"
+import { Download, Filter, Home } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainNav } from "@/components/main-nav"
 import { UserNav } from "@/components/user-nav"
@@ -12,26 +10,9 @@ import { DateRangePicker } from "@/components/date-range-picker"
 import { PropertySelector } from "@/components/property-selector"
 import { IncomeDistribution } from "@/components/income-distribution"
 import { ReportGenerator } from "@/components/report-generator"
-import { useDashboard, useInvoices, useLeases } from "@/hooks"
+import { AccountingKpis } from "@/components/accounting-kpis"
 
 export default function AccountingPage() {
-  const { data: dashboard, isLoading: dLoading } = useDashboard()
-  const { data: invoices, isLoading: iLoading } = useInvoices()
-  const { data: leases, isLoading: lLoading } = useLeases()
-  const isLoading = dLoading || iLoading || lLoading
-
-  const totalCollected = (invoices ?? []).reduce(
-    (sum, inv) => sum + parseFloat(inv.amount_paid || "0"), 0
-  )
-  const totalOutstanding = (invoices ?? []).reduce(
-    (sum, inv) => sum + parseFloat(inv.balance || "0"), 0
-  )
-  const activeLeases = (leases ?? []).filter((l) => l.status === "Active").length
-  const overdueCount = dashboard?.overdue_invoices_count ?? 0
-
-  const fmt = (n: number) =>
-    `R ${n.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`
-
   return (
     <div className="flex min-h-screen">
       <div className="group fixed left-0 top-0 h-full w-16 hover:w-64 bg-background border-r z-20 transition-all duration-300 overflow-hidden">
@@ -57,48 +38,7 @@ export default function AccountingPage() {
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Collected</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "—" : fmt(totalCollected)}</div>
-              <p className="text-xs text-muted-foreground">All paid invoices</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Outstanding Balance</CardTitle>
-              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "—" : fmt(totalOutstanding)}</div>
-              <p className="text-xs text-muted-foreground">Unpaid invoice balances</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Leases</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "—" : activeLeases}</div>
-              <p className="text-xs text-muted-foreground">Currently active leases</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue Invoices</CardTitle>
-              <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{isLoading ? "—" : overdueCount}</div>
-              <p className="text-xs text-muted-foreground">Require immediate attention</p>
-            </CardContent>
-          </Card>
-        </div>
+        <AccountingKpis />
 
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
