@@ -208,10 +208,35 @@ export default function LoginPage() {
 
         /* Responsive */
         @media (max-width:768px) {
-          .pp-panel { display:none; }
-          .pp-form-panel { padding:32px 20px; }
+          .pp-root { flex-direction: column; }
+          .pp-panel {
+            display:none;
+            width:100%;
+          }
+          .pp-form-panel {
+            padding:32px 20px;
+            min-height: auto;
+            justify-content: flex-start;
+            padding-top: 60px;
+          }
           .pp-mobile-logo { display:flex !important; }
+          .pp-form-card { max-width: 100%; }
+          .pp-panel-content { padding: 32px 24px; }
+          .pp-headline { padding: 24px 0 16px; }
+          .pp-h1 { font-size: clamp(24px, 5vw, 34px); margin-bottom: 12px; }
+          .pp-stats { gap: 20px; }
+          .pp-stat-num { font-size: 20px; }
+          .pp-float-card { bottom: 24px; left: 24px; right: 24px; }
         }
+
+        @media (max-width:480px) {
+          .pp-form-panel { padding: 24px 16px; padding-top: 50px; }
+          .pp-panel-content { padding: 20px 16px; }
+          .pp-form-title { font-size: 24px; }
+          .pp-form-sub { font-size: 13px; }
+          .pp-stats { flex-direction: column; gap: 12px; }
+        }
+
         .pp-mobile-logo {
           display:none; align-items:center; gap:8px; margin-bottom:32px;
         }
