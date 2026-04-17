@@ -4,11 +4,15 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_PATHS = ['/login', '/register', '/forgot-password']
 
 export function middleware(request: NextRequest) {
-  // Skip Next.js internal RSC (React Server Component) requests — redirecting
-  // these breaks client-side navigation and causes "page can't reload" errors.
-  if (request.headers.get('RSC') === '1') {
-    return NextResponse.next()
-  }
+  // Skip all Next.js internal RSC / prefetch / router requests.
+  // Redirecting these breaks client-side navigation in Next.js 15+.
+  const isRSC =
+    request.headers.get('RSC') === '1' ||
+    request.headers.has('Next-Router-State-Tree') ||
+    request.headers.has('Next-Router-Prefetch') ||
+    request.nextUrl.searchParams.has('_rsc')
+
+  if (isRSC) return NextResponse.next()
 
   const { pathname } = request.nextUrl
   const token = request.cookies.get('pm_access')?.value
