@@ -84,9 +84,12 @@ function processQueue(error: unknown, token: string | null = null) {
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     // If response is a paginated object with "results" key, extract the array
-    if (response.data && typeof response.data === 'object' && 'results' in response.data && Array.isArray(response.data.results)) {
-      return { ...response, data: response.data.results }
+    if (response.data && typeof response.data === 'object' && 'results' in response.data) {
+      const results = response.data.results
+      // Ensure results is always an array, default to empty array if not
+      return { ...response, data: Array.isArray(results) ? results : [] }
     }
+    // If data is already an array or doesn't have pagination structure, return as-is
     return response
   },
   async (error) => {
