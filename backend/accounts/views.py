@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import filters, generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -47,9 +47,19 @@ class UserListView(generics.ListAPIView):
     queryset           = User.objects.all()
     serializer_class   = UserListSerializer
     permission_classes = [IsAdmin]
+    filter_backends    = [filters.SearchFilter]
+    search_fields      = ["username", "email", "first_name", "last_name"]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        role = self.request.query_params.get("role")
+        if role:
+            queryset = queryset.filter(role=role)
+        return queryset
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset           = User.objects.all()
     serializer_class   = UserProfileSerializer
     permission_classes = [IsAdmin]
+
